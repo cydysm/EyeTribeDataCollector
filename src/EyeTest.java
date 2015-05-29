@@ -1,3 +1,6 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import com.theeyetribe.client.*;
 import com.theeyetribe.client.GazeManager.*;
 
@@ -7,12 +10,17 @@ public class EyeTest extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
+	// Declare variables
 	private GazeManager gm = GazeManager.getInstance();
 	private GazeListener gazeListener;
+	private JButton pause;
+	private JButton resume;
+	private JTextArea[] eyeData = new JTextArea[2];
+	
+	// Establish connection to local eye tribe server
 	private boolean isConnect = gm.activate(ApiVersion.VERSION_1_0,
 			ClientMode.PUSH);
 
-	private JTextArea[] eyeData = new JTextArea[2];
 
 	private EyeTest() {
 		super("Eye Tribe Data Collector");
@@ -31,18 +39,29 @@ public class EyeTest extends JFrame {
 			eyeData[i].setEditable(false);
 			eyeData[i].setOpaque(false);
 		}
-		eyeData[0].setBounds(10, 10, 600, 600);
-		eyeData[1].setBounds(10, 50, 600, 600);
+		eyeData[0].setBounds(10, 10, 600, 60);
+		eyeData[1].setBounds(10, 50, 600, 60);
+		
+		pause = new JButton("Pause Tracking");
+		pause.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				gazeListener.pause();
+			}
+		});
+		pause.setBounds(10, 90, 140, 50);
 
 		if (!isConnect) {
 			eyeData[0].setText("Server Not Set Up");
-		} else { 
+		} else {
 			eyeData[0].setText("Eye Tribe Not Calibrated");
 		}
-		
+
+		// Add widget to screen
 		this.setLayout(null);
 		this.add(eyeData[0]);
 		this.add(eyeData[1]);
+		this.add(pause);
 
 		gazeListener = new GazeListener(eyeData);
 		gm.addGazeListener(gazeListener);
