@@ -7,6 +7,7 @@ import com.theeyetribe.client.data.GazeData;
 
 public class GazeListener implements IGazeListener {
 
+	// Declare variables
 	private JTextArea[] eyeData;
 	private String[] eyeInfo = new String[2];
 	private ArrayList<String> streamData = new ArrayList<String>();
@@ -17,6 +18,9 @@ public class GazeListener implements IGazeListener {
 		this.eyeData = eyeData;
 	}
 
+	/**
+	 * Call this method whenever there is a new frame available
+	 */
 	@Override
 	public void onGazeUpdate(GazeData gazeData) {
 		if (!isPause) {
@@ -24,6 +28,11 @@ public class GazeListener implements IGazeListener {
 		}
 	}
 
+	/**
+	 * Generate eye data
+	 * 
+	 * @param gazeData
+	 */
 	private void getEyeData(GazeData gazeData) {
 		for (int i = 0; i < 2; i++) {
 			switch (i) {
@@ -56,18 +65,31 @@ public class GazeListener implements IGazeListener {
 		eyeData[1].setText(eyeInfo[1]);
 	}
 
+	/**
+	 * Pause data tracking
+	 */
 	public void pause() {
 		isPause = true;
 	}
 
+	/**
+	 * Resume data tracking
+	 */
 	public void resume() {
 		isPause = false;
 	}
 
+	/**
+	 * Start streaming data
+	 */
 	public void startStreaming() {
 		isStream = true;
 	}
 
+	/**
+	 * Stop streaming data
+	 * @return	An Arraylist of eye data
+	 */
 	public ArrayList<String> stopStreaming() {
 		isStream = false;
 		return streamData;

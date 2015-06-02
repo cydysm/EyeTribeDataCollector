@@ -36,6 +36,9 @@ public class EyeTest extends JFrame {
 		initiateUI();
 	}
 
+	/**
+	 * A method for initializing UI
+	 */
 	private void initiateUI() {
 		this.setResizable(false);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -94,9 +97,12 @@ public class EyeTest extends JFrame {
 					String timeStamp = new SimpleDateFormat(
 							"yyyy-MM-dd_HH-mm-ss").format(Calendar
 							.getInstance().getTime());
+					// Create a text file
 					File file = new File("StreamData_" + timeStamp + ".txt");
 					fileWriter = new FileWriter(file);
 
+					// Algorithm for producing meaningful streaming data
+					// and write them into text files
 					String temp = "";
 					temp += "Left Eye Coordinates in Pixels		Right Eye Coordinates in Pixels		Timestamp\n";
 					for (int i = 0; i < streamData.size() - 4; i = i + 3) {
@@ -105,7 +111,7 @@ public class EyeTest extends JFrame {
 							i = i + 3;
 						}
 						if (i < streamData.size() - 4) {
-							temp += String.format("%-25s%19s%41s\n",
+							temp += String.format("%-25s%19s%41sms\n",
 									streamData.get(i), streamData.get(i + 1),
 									streamData.get(i + 2));
 						}
@@ -138,9 +144,11 @@ public class EyeTest extends JFrame {
 		this.add(startStreaming);
 		this.add(stopStreaming);
 
+		// Initialize GazeListener and add listener to Gaze Manager 
 		gazeListener = new GazeListener(eyeData);
 		gm.addGazeListener(gazeListener);
 
+		// Set everything visible
 		setVisible(true);
 	}
 
