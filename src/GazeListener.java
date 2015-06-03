@@ -88,7 +88,7 @@ public class GazeListener implements IGazeListener {
 
 	/**
 	 * Stop streaming data
-	 * @return	An Arraylist of eye data
+	 * @return	An ArrayList of eye data
 	 */
 	public ArrayList<String> stopStreaming() {
 		isStream = false;

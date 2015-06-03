@@ -40,7 +40,7 @@ public class EyeTest extends JFrame {
 	 * A method for initializing UI
 	 */
 	private void initiateUI() {
-		this.setResizable(false);
+		this.setResizable(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setSize(300, 300);
 
@@ -93,10 +93,12 @@ public class EyeTest extends JFrame {
 					if (streamData.size() == 0) {
 						return;
 					}
+
 					// Get current system time
 					String timeStamp = new SimpleDateFormat(
 							"yyyy-MM-dd_HH-mm-ss").format(Calendar
 							.getInstance().getTime());
+					
 					// Create a text file
 					File file = new File("StreamData_" + timeStamp + ".txt");
 					fileWriter = new FileWriter(file);
@@ -106,25 +108,17 @@ public class EyeTest extends JFrame {
 					String temp = "";
 					temp += "Left Eye Coordinates in Pixels		Right Eye Coordinates in Pixels		Timestamp\n";
 					for (int i = 0; i < streamData.size() - 4; i = i + 3) {
-						while (streamData.get(i).equals("0, 0")
-								|| streamData.get(i + 1).equals("0, 0")) {
-							i = i + 3;
-						}
-						if (i < streamData.size() - 4) {
-							temp += String.format("%-25s%19s%41sms\n",
-									streamData.get(i), streamData.get(i + 1),
-									streamData.get(i + 2));
-						}
+						temp += String.format("%-25s%19s%41sms\n",
+								streamData.get(i), streamData.get(i + 1),
+								streamData.get(i + 2));
 					}
 					fileWriter.write(temp);
 					gazeListener.stopStreaming().clear();
 				} catch (IOException exception) {
-
 				} finally {
 					try {
 						fileWriter.close();
 					} catch (IOException exception) {
-
 					}
 				}
 			}
@@ -144,7 +138,7 @@ public class EyeTest extends JFrame {
 		this.add(startStreaming);
 		this.add(stopStreaming);
 
-		// Initialize GazeListener and add listener to Gaze Manager 
+		// Initialize GazeListener and add listener to Gaze Manager
 		gazeListener = new GazeListener(eyeData);
 		gm.addGazeListener(gazeListener);
 
