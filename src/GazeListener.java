@@ -38,7 +38,7 @@ public class GazeListener implements IGazeListener {
 			switch (i) {
 			case 0:
 				eyeInfo[i] = String
-						.format("Left Eye Coordinates in Pixels: (%.0f, %.0f)\nLeft Eye Pupil Size: %.0f mm",
+						.format(EyeTest.getTrialNumber() + "\n\nLeft Eye Coordinates in Pixels: (%.0f, %.0f)\nLeft Eye Pupil Size: %.0f mm",
 								gazeData.leftEye.smoothedCoordinates.x,
 								gazeData.leftEye.smoothedCoordinates.y,
 								gazeData.leftEye.pupilSize);

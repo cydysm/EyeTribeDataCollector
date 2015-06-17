@@ -1,11 +1,11 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 
 import com.theeyetribe.client.*;
 import com.theeyetribe.client.GazeManager.*;
@@ -23,6 +23,11 @@ public class EyeTest extends JFrame {
 	private JButton resume;
 	private JButton startStreaming;
 	private JButton stopStreaming;
+	private JButton changeDirectory;
+	private HintTextField trialNumber;
+	private static int trial = 1;
+	private boolean isDirectoryChanged = false;
+	private JFileChooser fc;
 	private JTextArea[] eyeData = new JTextArea[2];
 	private ArrayList<String> streamData = new ArrayList<String>();
 	private FileWriter fileWriter = null;
@@ -42,7 +47,7 @@ public class EyeTest extends JFrame {
 	private void initiateUI() {
 		this.setResizable(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
-		this.setSize(300, 300);
+		this.setSize(300, 350);
 
 		// eyeData[0] = left eye
 		// eyeData[1] = right eye
@@ -51,8 +56,8 @@ public class EyeTest extends JFrame {
 			eyeData[i].setEditable(false);
 			eyeData[i].setOpaque(false);
 		}
-		eyeData[0].setBounds(10, 10, 600, 60);
-		eyeData[1].setBounds(10, 50, 600, 60);
+		eyeData[0].setBounds(10, 10, 600, 100);
+		eyeData[1].setBounds(10, 80, 600, 50);
 
 		pause = new JButton("Pause Tracking");
 		pause.addActionListener(new ActionListener() {
@@ -61,7 +66,7 @@ public class EyeTest extends JFrame {
 				gazeListener.pause();
 			}
 		});
-		pause.setBounds(10, 90, 140, 50);
+		pause.setBounds(10, 130, 140, 50);
 
 		resume = new JButton("Resume Tracking");
 		resume.addActionListener(new ActionListener() {
@@ -70,7 +75,7 @@ public class EyeTest extends JFrame {
 				gazeListener.resume();
 			}
 		});
-		resume.setBounds(150, 90, 140, 50);
+		resume.setBounds(150, 130, 140, 50);
 
 		startStreaming = new JButton("Start Streaming");
 		startStreaming.addActionListener(new ActionListener() {
@@ -80,7 +85,7 @@ public class EyeTest extends JFrame {
 				startStreaming.setText("Streaming...");
 			}
 		});
-		startStreaming.setBounds(10, 150, 140, 50);
+		startStreaming.setBounds(10, 190, 140, 50);
 
 		stopStreaming = new JButton("Stop Streaming");
 		stopStreaming.addActionListener(new ActionListener() {
@@ -93,14 +98,25 @@ public class EyeTest extends JFrame {
 					if (streamData.size() == 0) {
 						return;
 					}
+					File dir;
+					// Check if there is data in the stream data ArrayList
+					if (streamData.size() == 0) {
+						trial--;
+						return;
+					}
+					// Create new directory if it does not exist
+					if (!isDirectoryChanged) {
+						dir = new File(System.getProperty("user.dir")
+								+ "/Eye Tribe Data");
+					} else {
+						dir = new File(fc.getSelectedFile().toString()
+								+ "/Eye Tribe Data");
+					}
 
-					// Get current system time
-					String timeStamp = new SimpleDateFormat(
-							"yyyy-MM-dd_HH-mm-ss").format(Calendar
-							.getInstance().getTime());
-					
-					// Create a text file
-					File file = new File("StreamData_" + timeStamp + ".txt");
+					if (!dir.exists())
+						dir.mkdir();
+
+					File file = new File(dir, getTrialNumber());
 					fileWriter = new FileWriter(file);
 
 					// Algorithm for producing meaningful streaming data
@@ -114,6 +130,7 @@ public class EyeTest extends JFrame {
 					}
 					fileWriter.write(temp);
 					gazeListener.stopStreaming().clear();
+					trial++;
 				} catch (IOException exception) {
 				} finally {
 					try {
@@ -123,8 +140,47 @@ public class EyeTest extends JFrame {
 				}
 			}
 		});
-		stopStreaming.setBounds(150, 150, 140, 50);
+		stopStreaming.setBounds(150, 190, 140, 50);
 
+		changeDirectory = new JButton("Change Directory");
+		changeDirectory.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+				isDirectoryChanged = true;
+				// Get custom file directory
+				fc = new JFileChooser();
+				fc.setCurrentDirectory(new java.io.File("."));
+				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fc.setAcceptAllFileFilterUsed(false);
+				if (fc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+					JOptionPane.showMessageDialog(null,
+							"Stream Data will be saved to "
+									+ fc.getSelectedFile().toString()
+									+ "/Eye Tribe Data", "Directory Changed",
+							JOptionPane.PLAIN_MESSAGE);
+				}
+			}
+		});
+		changeDirectory.setBounds(10, 250, 140, 50);
+		
+		trialNumber = new HintTextField("Change Trial #");
+		trialNumber.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					if (Integer.parseInt(trialNumber.getText()) > 0)
+						trial = Integer.parseInt(trialNumber.getText());
+					else
+						JOptionPane.showMessageDialog(null, "Invalid Number",
+								"Error", JOptionPane.PLAIN_MESSAGE);
+				} catch (Exception exception) {
+					JOptionPane.showMessageDialog(null, "Invalid Number",
+							"Error", JOptionPane.PLAIN_MESSAGE);
+				}
+			}
+		});
+		trialNumber.setBounds(150, 250, 140, 50);
+		
 		if (!isConnect) {
 			eyeData[0].setText("Server Not Set Up");
 		}
@@ -137,7 +193,8 @@ public class EyeTest extends JFrame {
 		this.add(resume);
 		this.add(startStreaming);
 		this.add(stopStreaming);
-
+		this.add(changeDirectory);
+		this.add(trialNumber);
 		// Initialize GazeListener and add listener to Gaze Manager
 		gazeListener = new GazeListener(eyeData);
 		gm.addGazeListener(gazeListener);
@@ -148,5 +205,47 @@ public class EyeTest extends JFrame {
 
 	public static void main(String[] args) {
 		new EyeTest();
+	}
+
+	public static String getTrialNumber() {
+		return "Trial_" + trial + ".txt";
+	}
+}
+
+class HintTextField extends JTextField implements FocusListener {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final String hint;
+	private boolean showingHint;
+
+	public HintTextField(final String hint) {
+		super(hint);
+		this.hint = hint;
+		this.showingHint = true;
+		super.addFocusListener(this);
+	}
+
+	@Override
+	public void focusGained(FocusEvent e) {
+		if (this.getText().isEmpty()) {
+			super.setText("");
+			showingHint = false;
+		}
+	}
+
+	@Override
+	public void focusLost(FocusEvent e) {
+		if (this.getText().isEmpty()) {
+			super.setText(hint);
+			showingHint = true;
+		}
+	}
+
+	@Override
+	public String getText() {
+		return showingHint ? "" : super.getText();
 	}
 }
